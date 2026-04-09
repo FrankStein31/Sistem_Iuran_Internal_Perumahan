@@ -1,5 +1,4 @@
 # Sistem Administrasi RT Perumahan Elite
-**Skill Fit Test - Full Stack Programmer Apprentice**
 
 Sistem ini adalah aplikasi manajemen iuran dan data warga tingkat rukun tetangga (RT) untuk perumahan elite yang dibangun terpisah (Headless API) menggunakan **Laravel 13** dan antarmuka single-page application (SPA) menggunakan **React 18 & Vite**.
 
@@ -154,4 +153,4 @@ erDiagram
 ```
 
 ## Referensi & Kontribusi
-Dikembangkan sebagai Studi Kasus Jagoan Hosting / RT Administrative Management System.
+Dikembangkan oleh Frankie Steinlie
