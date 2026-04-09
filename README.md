@@ -1,58 +1,157 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Administrasi RT Perumahan Elite
+**Skill Fit Test - Full Stack Programmer Apprentice**
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem ini adalah aplikasi manajemen iuran dan data warga tingkat rukun tetangga (RT) untuk perumahan elite yang dibangun terpisah (Headless API) menggunakan **Laravel 13** dan antarmuka single-page application (SPA) menggunakan **React 18 & Vite**.
 
-## About Laravel
+## Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Dashboard**: Statistik realtime pendapatan, pengeluaran, saldo, serta grafik interaktif riwayat transaksi 12 bulan terakhir.
+- **Manajemen Penghuni**: CRUD data penghuni tetap dan kontrak beserta upload KTP.
+- **Manajemen Rumah**: Pengelolaan 20 rumah beserta riwayat historis (keluar/masuk) penghuni yang menempatinya.
+- **Manajemen Iuran**: Penagihan iuran satpam dan kebersihan, integrasi "1-click Bulk Generate" untuk tagihan bulanan seluruh warga yang menempati rumah, dan manajemen penerimaan (Bayar Lunas).
+- **Manajemen Pengeluaran**: Pengarsipan kas keluar yang terekam sempurna setiap tanggal beserta kategori penggunaannya.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🛠 Tech Stack
+- **Backend:** Laravel 13, PHP 8.3, MySQL / MariaDB, Sanctum (API Authentication)
+- **Frontend:** React 18, Vite, Tailwind CSS v4, Axios, React Router v7, Recharts, Lucide React
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 📦 1. Lengkap Instalasi Guide (Panduan Instalasi)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+⚠️ **Mohon ikuti langkah-langkah di bawah ini secara persis agar aplikasi berjalan sempurna tanpa peringatan error (disqualification free).**
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### A. Persiapan Lingkungan Sistem
+Pastikan Anda sudah menginstal:
+- PHP 8.3 atau terbaru
+- Composer
+- Node.js (Minimal versi 18+)
+- MySQL atau MariaDB (via XAMPP, Laragon, dsb.)
+- Git
 
-## Agentic Development
+### B. Konfigurasi Backend (Laravel)
+1. Buka terminal/command prompt, navigasikan ke folder `backend`:
+   ```bash
+   cd backend
+   ```
+2. Karena proyek ini baru diunduh, buat file `.env` dari `.env.example` (jika belum ada):
+   ```bash
+   cp .env.example .env
+   ```
+3. Buat database baru di MySQL dengan nama: **iuran_perumahan**
+4. Install dependensi composer:
+   ```bash
+   composer install
+   ```
+5. Generate application key:
+   ```bash
+   php artisan key:generate
+   ```
+6. Jalankan migrasi tabel beserta *dummy data* (20 Rumah, 20 Penghuni, Iuran historis, dan Pengeluaran):
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+7. *Link* folder storage (Penting untuk upload KTP & Bukti bayar):
+   ```bash
+   php artisan storage:link
+   ```
+8. Jalankan server Backend API di port standard (8000):
+   ```bash
+   php artisan serve
+   ```
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### C. Konfigurasi Frontend (React)
+1. Buka terminal **baru** (biarkan terminal Backend tetap berjalan).
+2. Pindah ke direktori frontend:
+   ```bash
+   cd frontend
+   ```
+3. Install dependensi NPM:
+   ```bash
+   npm install
+   ```
+4. Jalankan server frontend Vite:
+   ```bash
+   npm run dev
+   ```
+   *Frontend akan otomatis terbuka di `http://localhost:5173` atau Anda dapat mengakses link tersebut secara manual di browser.*
 
-```bash
-composer require laravel/boost --dev
+### D. Akses Aplikasi
+- Buka URL: [http://localhost:5173](http://localhost:5173) di Browser.
+- Login menggunakan kredensial dummy berikut:
+  - **Email:** `admin@rt.com`
+  - **Password:** `password`
 
-php artisan boost:install
+---
+
+## 📊 2. Entity Relationship Diagram (ERD)
+
+Aplikasi ini menggunakan skema relasional yang mengikat satu rumah dan penghuninya secara historikal (`house_residents`), serta tabel pembayaran yang independen dengan validasi constraints.
+
+```mermaid
+erDiagram
+    users {
+        bigint id PK
+        string name
+        string email UK
+        string password
+    }
+
+    residents {
+        bigint id PK
+        string nama_lengkap
+        string no_ktp UK
+        string foto_ktp
+        enum status_penghuni "tetap, kontrak"
+        string no_hp
+        enum status_nikah "menikah, belum_menikah"
+    }
+
+    houses {
+        bigint id PK
+        string nomor_rumah UK
+        string alamat
+        enum status_hunian "dihuni, tidak_dihuni"
+        bigint current_resident_id FK
+    }
+
+    house_residents {
+        bigint id PK
+        bigint house_id FK
+        bigint resident_id FK
+        date tanggal_masuk
+        date tanggal_keluar
+        boolean is_active
+    }
+
+    payments {
+        bigint id PK
+        bigint house_id FK
+        bigint resident_id FK
+        enum jenis_iuran "satpam, kebersihan"
+        int bulan
+        year tahun
+        decimal jumlah
+        enum status "paid, unpaid"
+        date tanggal_bayar
+    }
+
+    expenses {
+        bigint id PK
+        date tanggal
+        string deskripsi
+        decimal jumlah
+        string kategori
+    }
+
+    houses ||--o| residents : "Ditempati saat ini oleh (current_resident_id)"
+    houses ||--o{ house_residents : "Memiliki history penghuni"
+    residents ||--o{ house_residents : "Memiliki history rumah"
+    houses ||--o{ payments : "Memiliki tagihan bulanan"
+    residents ||--o{ payments : "Bertanggung jawab atas tagihan"
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Referensi & Kontribusi
+Dikembangkan sebagai Studi Kasus Jagoan Hosting / RT Administrative Management System.
