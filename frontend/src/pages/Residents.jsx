@@ -40,7 +40,7 @@ const ExpandedComponent = ({ data }) => {
                 {data.foto_ktp && (
                     <div>
                         <h5 className="text-sm font-medium text-gray-600 mb-1">Preview KTP:</h5>
-                        <img src={`http://localhost:8000/storage/${data.foto_ktp}`} onError={(e) => { e.target.onerror = null; e.target.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'%3E%3Crect width='300' height='200' fill='%23f3f4f6'/%3E%3Ctext x='150' y='100' font-family='sans-serif' font-size='14' text-anchor='middle' dominant-baseline='middle' fill='%239ca3af'%3EGambar Tidak Ditemukan%3C/text%3E%3C/svg%3E"; }} alt="KTP" className="mt-1 h-32 w-auto object-cover rounded shadow-sm border border-gray-200" />
+                        <img src={`/storage/${data.foto_ktp}`} onError={(e) => { e.target.onerror = null; e.target.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'%3E%3Crect width='300' height='200' fill='%23f3f4f6'/%3E%3Ctext x='150' y='100' font-family='sans-serif' font-size='14' text-anchor='middle' dominant-baseline='middle' fill='%239ca3af'%3EGambar Tidak Ditemukan%3C/text%3E%3C/svg%3E"; }} alt="KTP" className="mt-1 h-32 w-auto object-cover rounded shadow-sm border border-gray-200" />
                     </div>
                 )}
             </div>
@@ -188,7 +188,7 @@ const Residents = () => {
                 <div className="flex items-center py-2">
                     {row.foto_ktp ? (
                         <div className="flex-shrink-0 h-10 w-10 mr-3">
-                            <img className="h-10 w-10 rounded-full object-cover border border-gray-200" src={`http://localhost:8000/storage/${row.foto_ktp}`} onError={(e) => { e.target.onerror = null; e.target.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' font-family='sans-serif' font-size='24' text-anchor='middle' dominant-baseline='middle' fill='%239ca3af'%3E!%3C/text%3E%3C/svg%3E"; }} alt="KTP" />
+                            <img className="h-10 w-10 rounded-full object-cover border border-gray-200" src={`/storage/${row.foto_ktp}`} onError={(e) => { e.target.onerror = null; e.target.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' font-family='sans-serif' font-size='24' text-anchor='middle' dominant-baseline='middle' fill='%239ca3af'%3E!%3C/text%3E%3C/svg%3E"; }} alt="KTP" />
                         </div>
                     ) : (
                         <div className="flex-shrink-0 h-10 w-10 mr-3 bg-gray-100 rounded-full flex items-center justify-center border text-gray-400 text-xs font-semibold">

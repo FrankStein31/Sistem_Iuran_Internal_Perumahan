@@ -13,6 +13,15 @@ export default defineConfig({
       'react-is': 'react-is/cjs/react-is.development.js',
     }
   },
+  server: {
+    proxy: {
+      '/storage': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  },
   optimizeDeps: {
     include: ['react-is', 'react-data-table-component', 'styled-components']
   }
