@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { CreditCard, CheckCircle, Search, FileText, Download, Check, AlertCircle } from 'lucide-react';
+import { CreditCard, CheckCircle, Search, FileText, Download, Check, AlertCircle, ChevronRight, ChevronDown } from 'lucide-react';
 import api from '../api/axios';
 import DataTable_ from 'react-data-table-component';
 const DataTable = DataTable_.default || DataTable_;
@@ -7,6 +7,20 @@ import * as XLSX from 'xlsx';
 
 const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    if(dateString.includes('T') || dateString.includes('-')) {
+        const d = new Date(dateString);
+        if(!isNaN(d)) return new Intl.DateTimeFormat('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }).format(d);
+    }
+    return dateString;
+};
+
+const CustomExpandIcon = {
+    collapsed: <div className="flex flex-col items-center justify-center p-1 text-gray-500 hover:text-indigo-600 transition cursor-pointer" title="Lihat Detail"><ChevronRight className="w-5 h-5 -mb-1"/><span className="text-[10px] font-bold mt-1">DETAIL</span></div>,
+    expanded: <div className="flex flex-col items-center justify-center p-1 text-indigo-600 transition cursor-pointer" title="Tutup Detail"><ChevronDown className="w-5 h-5 -mb-1"/><span className="text-[10px] font-bold mt-1">TUTUP</span></div>
 };
 
 const ExpandedPaymentComponent = ({ data }) => {
@@ -33,7 +47,7 @@ const ExpandedPaymentComponent = ({ data }) => {
                              {satpam.tanggal_bayar && (
                                  <div className="flex justify-between">
                                      <span className="text-gray-500">Tgl Bayar:</span>
-                                     <span className="text-gray-900">{satpam.tanggal_bayar}</span>
+                                     <span className="text-gray-900">{formatDate(satpam.tanggal_bayar)}</span>
                                  </div>
                              )}
                          </div>
@@ -57,7 +71,7 @@ const ExpandedPaymentComponent = ({ data }) => {
                              {kebersihan.tanggal_bayar && (
                                  <div className="flex justify-between">
                                      <span className="text-gray-500">Tgl Bayar:</span>
-                                     <span className="text-gray-900">{kebersihan.tanggal_bayar}</span>
+                                     <span className="text-gray-900">{formatDate(kebersihan.tanggal_bayar)}</span>
                                  </div>
                              )}
                          </div>
@@ -320,6 +334,7 @@ const Payments = () => {
                     pagination
                     progressPending={loading}
                     expandableRows
+                    expandableIcon={CustomExpandIcon}
                     expandableRowsComponent={ExpandedPaymentComponent}
                     highlightOnHover
                     responsive

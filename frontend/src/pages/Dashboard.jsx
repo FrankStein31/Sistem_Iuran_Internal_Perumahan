@@ -120,8 +120,8 @@ const Dashboard = () => {
                 {/* Chart Area */}
                 <div className="lg:col-span-2 bg-white shadow rounded-lg p-6">
                     <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Grafik Keuangan 1 Tahun Terakhir</h3>
-                    <div className="h-80">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-80 w-full">
+                        <ResponsiveContainer width="100%" height={320}>
                             <AreaChart data={[...chart_data].reverse()} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="colorPemasukan" x1="0" y1="0" x2="0" y2="1">

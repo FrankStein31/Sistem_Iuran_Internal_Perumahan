@@ -1,8 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Home, Edit, Trash2, Search, X, UserPlus, UserMinus, Info } from 'lucide-react';
+import { Home, Edit, Trash2, Search, X, UserPlus, UserMinus, Info, ChevronRight, ChevronDown } from 'lucide-react';
 import api from '../api/axios';
 import DataTable_ from 'react-data-table-component';
 const DataTable = DataTable_.default || DataTable_;
+
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    if(dateString.includes('T') || dateString.includes('-')) {
+        const d = new Date(dateString);
+        if(!isNaN(d)) return new Intl.DateTimeFormat('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }).format(d);
+    }
+    return dateString;
+};
+
+const CustomExpandIcon = {
+    collapsed: <div className="flex flex-col items-center justify-center p-1 text-gray-500 hover:text-indigo-600 transition cursor-pointer" title="Lihat Detail"><ChevronRight className="w-5 h-5 -mb-1"/><span className="text-[10px] font-bold mt-1">DETAIL</span></div>,
+    expanded: <div className="flex flex-col items-center justify-center p-1 text-indigo-600 transition cursor-pointer" title="Tutup Detail"><ChevronDown className="w-5 h-5 -mb-1"/><span className="text-[10px] font-bold mt-1">TUTUP</span></div>
+};
 
 const ExpandedHouseComponent = ({ data }) => {
     const [details, setDetails] = useState(null);
@@ -43,9 +57,9 @@ const ExpandedHouseComponent = ({ data }) => {
                                 <li key={idx} className="bg-white p-3 border rounded shadow-sm">
                                     <div className="font-medium text-gray-800">{hr.resident?.nama_lengkap} <span className="text-xs font-normal text-gray-500">({hr.resident?.status_penghuni})</span></div>
                                     <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                         <span>Masuk: {hr.tanggal_masuk}</span> 
+                                         <span>Masuk: {formatDate(hr.tanggal_masuk)}</span> 
                                          <span className="text-gray-300">|</span> 
-                                         <span>Keluar: {hr.tanggal_keluar || '-'}</span>
+                                         <span>Keluar: {formatDate(hr.tanggal_keluar)}</span>
                                     </div>
                                     {hr.catatan && <div className="text-xs italic text-gray-500 mt-2 bg-gray-50 p-1 rounded">Catatan: {hr.catatan}</div>}
                                 </li>
@@ -93,7 +107,11 @@ const Houses = () => {
     const [houses, setHouses] = useState([]);
     const [residents, setResidents] = useState([]); // Will only contain unassigned.
     const [loading, setLoading] = useState(true);
+    
+    // Filters
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterStatusRumah, setFilterStatusRumah] = useState('');
+
     const [isHouseModalOpen, setIsHouseModalOpen] = useState(false);
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
     const [currentHouse, setCurrentHouse] = useState(null);
@@ -287,10 +305,11 @@ const Houses = () => {
         }
     ];
 
-    const filteredHouses = houses.filter(h => 
-        h.nomor_rumah.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        h.alamat.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredHouses = houses.filter(h => {
+        const matchSearch = h.nomor_rumah.toLowerCase().includes(searchTerm.toLowerCase()) || h.alamat.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchStatus = filterStatusRumah === '' || h.status_hunian === filterStatusRumah;
+        return matchSearch && matchStatus;
+    });
 
     const selectedResidentObj = residents.find(r => r.id.toString() === assignData.resident_id.toString());
 
@@ -312,17 +331,31 @@ const Houses = () => {
 
             <div className="bg-white rounded-lg shadow overflow-hidden p-4">
                 <div className="mb-4">
-                    <div className="relative rounded-md shadow-sm max-w-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-5 w-5 text-gray-400" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Pencarian</label>
+                            <div className="relative rounded-md shadow-sm">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Search className="h-4 w-4 text-gray-400" />
+                                </div>
+                                <input
+                                    type="text"
+                                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 border bg-white"
+                                    placeholder="Cari nomor atau alamat rumah..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
                         </div>
-                        <input
-                            type="text"
-                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 border"
-                            placeholder="Cari nomor atau alamat rumah..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Status Rumah</label>
+                            <select className="block w-full border-gray-300 rounded-md sm:text-sm border py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white" 
+                                value={filterStatusRumah} onChange={(e) => setFilterStatusRumah(e.target.value)}>
+                                <option value="">Semua Status</option>
+                                <option value="dihuni">Sedang Dihuni</option>
+                                <option value="tidak_dihuni">Kosong (Tidak Dihuni)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 
@@ -332,6 +365,7 @@ const Houses = () => {
                     pagination
                     progressPending={loading}
                     expandableRows
+                    expandableIcon={CustomExpandIcon}
                     expandableRowsComponent={ExpandedHouseComponent}
                     highlightOnHover
                     responsive
