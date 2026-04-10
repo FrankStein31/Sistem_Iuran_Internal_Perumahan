@@ -64,8 +64,7 @@ insert  into `expenses`(`id`,`tanggal`,`deskripsi`,`jumlah`,`kategori`,`bukti`,`
 (4,'2026-03-10','Token listrik pos satpam',150000.00,'listrik',NULL,NULL,'2026-04-09 08:31:11','2026-04-09 08:31:11'),
 (5,'2026-03-20','Cat pagar perumahan',300000.00,'umum',NULL,NULL,'2026-04-09 08:31:11','2026-04-09 08:31:11'),
 (6,'2026-04-05','Gaji satpam bulan ini',1500000.00,'gaji_satpam',NULL,NULL,'2026-04-09 08:31:11','2026-04-09 08:31:11'),
-(7,'2026-04-08','Token listrik pos satpam',150000.00,'listrik',NULL,NULL,'2026-04-09 08:31:11','2026-04-09 08:31:11'),
-(8,'2026-04-12','Perbaikan jalan retak',750000.00,'perbaikan_jalan',NULL,NULL,'2026-04-09 08:31:11','2026-04-09 08:31:11');
+(7,'2026-04-08','Token listrik pos satpam',150000.00,'listrik',NULL,NULL,'2026-04-09 08:31:11','2026-04-09 08:31:11');
 
 /*Table structure for table `failed_jobs` */
 
@@ -100,7 +99,7 @@ CREATE TABLE `house_residents` (
   KEY `house_residents_resident_id_foreign` (`resident_id`),
   CONSTRAINT `house_residents_house_id_foreign` FOREIGN KEY (`house_id`) REFERENCES `houses` (`id`) ON DELETE CASCADE,
   CONSTRAINT `house_residents_resident_id_foreign` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `house_residents` */
 
@@ -121,7 +120,10 @@ insert  into `house_residents`(`id`,`house_id`,`resident_id`,`tanggal_masuk`,`ta
 (14,14,14,'2025-10-01',NULL,1,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10'),
 (15,15,15,'2025-10-01',NULL,1,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10'),
 (16,16,16,'2025-10-01',NULL,1,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10'),
-(17,17,17,'2025-10-01',NULL,1,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10');
+(17,17,17,'2025-10-01',NULL,1,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10'),
+(18,18,19,'2026-04-10','2026-04-10',0,NULL,'2026-04-10 07:32:31','2026-04-10 07:35:12'),
+(19,18,18,'2026-04-10','2026-04-10',0,NULL,'2026-04-10 07:35:34','2026-04-10 07:36:38'),
+(20,18,21,'2026-04-10','2026-04-10',0,NULL,'2026-04-10 09:20:06','2026-04-10 09:20:32');
 
 /*Table structure for table `houses` */
 
@@ -136,7 +138,7 @@ CREATE TABLE `houses` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `houses_nomor_rumah_unique` (`nomor_rumah`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `houses` */
 
@@ -158,9 +160,10 @@ insert  into `houses`(`id`,`nomor_rumah`,`alamat`,`status_hunian`,`current_resid
 (15,'15','Jl. Perumahan Elite Blok A No. 15','dihuni',15,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10'),
 (16,'16','Jl. Perumahan Elite Blok A No. 16','dihuni',16,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10'),
 (17,'17','Jl. Perumahan Elite Blok A No. 17','dihuni',17,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10'),
-(18,'18','Jl. Perumahan Elite Blok A No. 18','tidak_dihuni',NULL,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10'),
+(18,'18','Jl. Perumahan Elite Blok A No. 18','tidak_dihuni',NULL,NULL,'2026-04-09 08:31:10','2026-04-10 09:20:32'),
 (19,'19','Jl. Perumahan Elite Blok A No. 19','tidak_dihuni',NULL,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10'),
-(20,'20','Jl. Perumahan Elite Blok A No. 20','tidak_dihuni',NULL,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10');
+(20,'20','Jl. Perumahan Elite Blok A No. 20','tidak_dihuni',NULL,NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10'),
+(21,'21','Coa','tidak_dihuni',NULL,'coba','2026-04-10 09:21:05','2026-04-10 09:21:05');
 
 /*Table structure for table `job_batches` */
 
@@ -249,7 +252,7 @@ CREATE TABLE `payments` (
   KEY `payments_resident_id_foreign` (`resident_id`),
   CONSTRAINT `payments_house_id_foreign` FOREIGN KEY (`house_id`) REFERENCES `houses` (`id`) ON DELETE CASCADE,
   CONSTRAINT `payments_resident_id_foreign` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `payments` */
 
@@ -355,7 +358,9 @@ insert  into `payments`(`id`,`house_id`,`resident_id`,`jenis_iuran`,`bulan`,`tah
 (99,16,16,'satpam',4,2026,100000.00,'paid','2026-04-09',NULL,'2026-04-09 08:31:11','2026-04-09 08:44:32'),
 (100,16,16,'kebersihan',4,2026,15000.00,'paid','2026-04-09',NULL,'2026-04-09 08:31:11','2026-04-09 08:45:28'),
 (101,17,17,'satpam',4,2026,100000.00,'paid','2026-04-09',NULL,'2026-04-09 08:31:11','2026-04-09 08:46:45'),
-(102,17,17,'kebersihan',4,2026,15000.00,'paid','2026-04-09',NULL,'2026-04-09 08:31:11','2026-04-09 08:42:55');
+(102,17,17,'kebersihan',4,2026,15000.00,'paid','2026-04-09',NULL,'2026-04-09 08:31:11','2026-04-09 08:42:55'),
+(103,18,19,'satpam',4,2026,100000.00,'paid','2026-04-10',NULL,'2026-04-10 07:33:04','2026-04-10 07:33:24'),
+(104,18,19,'kebersihan',4,2026,15000.00,'paid','2026-04-10',NULL,'2026-04-10 07:33:04','2026-04-10 07:34:13');
 
 /*Table structure for table `personal_access_tokens` */
 
@@ -374,12 +379,12 @@ CREATE TABLE `personal_access_tokens` (
   UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
   KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`),
   KEY `personal_access_tokens_expires_at_index` (`expires_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `personal_access_tokens` */
 
 insert  into `personal_access_tokens`(`id`,`tokenable_type`,`tokenable_id`,`name`,`token`,`abilities`,`last_used_at`,`expires_at`,`created_at`,`updated_at`) values 
-(1,'App\\Models\\User',1,'auth_token','ea3a67de5b3533ef2b7335a9c846958a5bac823192ef30c365fdf71c11654ce9','[\"*\"]','2026-04-09 08:50:18',NULL,'2026-04-09 08:39:04','2026-04-09 08:50:18');
+(2,'App\\Models\\User',1,'auth_token','3d1e4f7999e70c1dbbdae83550ec0b5eb23c414f4f6f38ed2d02701e352b87d4','[\"*\"]','2026-04-10 09:26:56',NULL,'2026-04-10 08:59:57','2026-04-10 09:26:56');
 
 /*Table structure for table `residents` */
 
@@ -397,7 +402,7 @@ CREATE TABLE `residents` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `residents_no_ktp_unique` (`no_ktp`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `residents` */
 
@@ -414,14 +419,15 @@ insert  into `residents`(`id`,`nama_lengkap`,`no_ktp`,`foto_ktp`,`status_penghun
 (10,'Nia Puspita','3201010101010010',NULL,'tetap','081234567810','menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL),
 (11,'Fajar Nugroho','3201010101010011',NULL,'tetap','081234567811','menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL),
 (12,'Eka Wahyuni','3201010101010012',NULL,'tetap','081234567812','belum_menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL),
-(13,'Agus Prasetyo','3201010101010013',NULL,'tetap','081234567813','menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL),
+(13,'Agus Prasetyo','3201010101010013','ktp/wiHJnuYRMl9alQw7zfuvocbNjXxBIjJm527CquQ0.png','tetap','081234567813','menikah',NULL,'2026-04-09 08:31:10','2026-04-10 08:55:47',NULL),
 (14,'Sri Mulyani','3201010101010014',NULL,'tetap','081234567814','menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL),
 (15,'Bambang Wijaya','3201010101010015',NULL,'tetap','081234567815','menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL),
 (16,'Rizki Maulana','3201010101010016',NULL,'kontrak','081234567816','belum_menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL),
 (17,'Anisa Putri','3201010101010017',NULL,'kontrak','081234567817','belum_menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL),
-(18,'Dian Permata','3201010101010018',NULL,'kontrak','081234567818','menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL),
+(18,'Dian Permata','3201010101010018','ktp/oizxFSKtVRJbMJLLBgt2rTWO5kwAgITiCnXIkNC2.png','kontrak','081234567818','menikah',NULL,'2026-04-09 08:31:10','2026-04-10 09:11:28',NULL),
 (19,'Citra Melinda','3201010101010019',NULL,'kontrak','081234567819','belum_menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL),
-(20,'Wahyu Setiawan','3201010101010020',NULL,'kontrak','081234567820','menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL);
+(20,'Wahyu Setiawan','3201010101010020',NULL,'kontrak','081234567820','menikah',NULL,'2026-04-09 08:31:10','2026-04-09 08:31:10',NULL),
+(21,'frankie steinlie','1231123112311231','ktp/LYdHOO30AidfVGFtLBGMACMVqPKWVIcefj1r3qXp.png','tetap','08883866931','belum_menikah',NULL,'2026-04-10 09:19:30','2026-04-10 09:19:30',NULL);
 
 /*Table structure for table `sessions` */
 
