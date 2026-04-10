@@ -26,6 +26,14 @@ class HouseController extends Controller
             $query->where('status_hunian', $request->status_hunian);
         }
 
+        if ($request->per_page === 'all') {
+            $houses = $query->orderByRaw("CAST(nomor_rumah AS UNSIGNED)")->get();
+            return response()->json([
+                'success' => true,
+                'data' => ['data' => $houses],
+            ]);
+        }
+
         $houses = $query->orderByRaw("CAST(nomor_rumah AS UNSIGNED)")->paginate($request->per_page ?? 20);
 
         return response()->json([
@@ -108,6 +116,7 @@ class HouseController extends Controller
         $validated = $request->validate([
             'resident_id'   => 'required|exists:residents,id',
             'tanggal_masuk' => 'required|date',
+            'tanggal_keluar'=> 'nullable|date|after_or_equal:tanggal_masuk',
             'catatan'       => 'nullable|string',
         ]);
 
@@ -138,6 +147,7 @@ class HouseController extends Controller
                 'house_id'      => $house->id,
                 'resident_id'   => $validated['resident_id'],
                 'tanggal_masuk' => $validated['tanggal_masuk'],
+                'tanggal_keluar'=> $validated['tanggal_keluar'] ?? null,
                 'is_active'     => true,
                 'catatan'       => $validated['catatan'] ?? null,
             ]);

@@ -12,7 +12,7 @@ class ResidentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Resident::with(['currentHouseResident.house']);
+        $query = Resident::with(['currentHouseResident.house', 'houseResidents.house']);
 
         if ($request->search) {
             $query->where(function ($q) use ($request) {
@@ -28,6 +28,14 @@ class ResidentController extends Controller
 
         if ($request->status_nikah) {
             $query->where('status_nikah', $request->status_nikah);
+        }
+
+        if ($request->per_page === 'all') {
+            $residents = $query->orderBy('nama_lengkap')->get();
+            return response()->json([
+                'success' => true,
+                'data' => ['data' => $residents],
+            ]);
         }
 
         $residents = $query->orderBy('nama_lengkap')->paginate($request->per_page ?? 15);
@@ -129,9 +137,17 @@ class ResidentController extends Controller
         ]);
     }
 
-    public function all()
+    public function all(Request $request)
     {
-        $residents = Resident::orderBy('nama_lengkap')->get(['id', 'nama_lengkap', 'no_ktp', 'status_penghuni', 'no_hp']);
+        $query = Resident::orderBy('nama_lengkap');
+
+        if ($request->unassigned) {
+            $query->whereDoesntHave('houseResidents', function($q) {
+                $q->where('is_active', true);
+            });
+        }
+
+        $residents = $query->get(['id', 'nama_lengkap', 'no_ktp', 'status_penghuni', 'no_hp']);
 
         return response()->json([
             'success' => true,

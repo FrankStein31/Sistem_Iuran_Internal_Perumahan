@@ -8,4 +8,12 @@ export default defineConfig({
     tailwindcss(),
     react()
   ],
+  resolve: {
+    alias: {
+      'react-is': 'react-is/cjs/react-is.development.js',
+    }
+  },
+  optimizeDeps: {
+    include: ['react-is', 'react-data-table-component', 'styled-components']
+  }
 })

@@ -1,10 +1,97 @@
 import { useState, useEffect } from 'react';
-import { Home, Edit, Trash2, Search, X, UserPlus, UserMinus } from 'lucide-react';
+import { Home, Edit, Trash2, Search, X, UserPlus, UserMinus, Info } from 'lucide-react';
 import api from '../api/axios';
+import DataTable_ from 'react-data-table-component';
+const DataTable = DataTable_.default || DataTable_;
+
+const ExpandedHouseComponent = ({ data }) => {
+    const [details, setDetails] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDetails = async () => {
+            setLoading(true);
+            try {
+                const response = await api.get(`/houses/${data.id}`);
+                setDetails(response.data.data);
+            } catch (error) {
+                console.error("Failed to load house details", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDetails();
+    }, [data.id]);
+
+    if (loading) return <div className="p-4 pl-16 text-sm text-gray-500">Memuat detail rumah...</div>;
+    if (!details) return <div className="p-4 pl-16 text-sm text-red-500">Gagal memuat detail.</div>;
+
+    const pastResidents = details.house_residents?.filter(hr => !hr.is_active) || [];
+    const payments = details.payments || [];
+
+    return (
+        <div className="p-4 bg-gray-50 border-b border-gray-100 pl-16">
+            <h4 className="font-semibold text-gray-800 mb-4 flex items-center"><Home className="w-4 h-4 mr-2 text-indigo-500" /> Informasi Detail Rumah {details.nomor_rumah}</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h5 className="text-sm font-bold text-gray-700 border-b pb-1 mb-2">Riwayat Penghuni Terdahulu</h5>
+                    {pastResidents.length === 0 ? (
+                        <p className="text-sm text-gray-500 italic bg-white p-2 border rounded">Belum ada riwayat penghuni terdahulu.</p>
+                    ) : (
+                        <ul className="text-sm space-y-2">
+                            {pastResidents.map((hr, idx) => (
+                                <li key={idx} className="bg-white p-3 border rounded shadow-sm">
+                                    <div className="font-medium text-gray-800">{hr.resident?.nama_lengkap} <span className="text-xs font-normal text-gray-500">({hr.resident?.status_penghuni})</span></div>
+                                    <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                         <span>Masuk: {hr.tanggal_masuk}</span> 
+                                         <span className="text-gray-300">|</span> 
+                                         <span>Keluar: {hr.tanggal_keluar || '-'}</span>
+                                    </div>
+                                    {hr.catatan && <div className="text-xs italic text-gray-500 mt-2 bg-gray-50 p-1 rounded">Catatan: {hr.catatan}</div>}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+                
+                <div>
+                    <h5 className="text-sm font-bold text-gray-700 border-b pb-1 mb-2">10 Histori Pembayaran Terakhir</h5>
+                    {payments.length === 0 ? (
+                        <p className="text-sm text-gray-500 italic bg-white p-2 border rounded">Belum ada data pembayaran untuk rumah ini.</p>
+                    ) : (
+                        <ul className="text-sm space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                            {payments.slice(0, 10).map((p, idx) => (
+                                <li key={idx} className="bg-white p-2 border rounded shadow-sm flex flex-col gap-1">
+                                    <div className="flex justify-between items-center">
+                                        <div className="font-semibold text-gray-800 capitalize flex items-center">
+                                            {p.jenis_iuran} <span className="ml-2 font-normal text-xs text-gray-500">Bl. {p.bulan}/{p.tahun}</span>
+                                        </div>
+                                        <div>
+                                            <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wide font-bold rounded ${p.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                {p.status === 'paid' ? 'Lunas' : 'Belum Cek'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">Pembayar: <span className="font-medium text-gray-700">{p.resident?.nama_lengkap || '-'}</span></div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            </div>
+            {details.keterangan && (
+                 <div className="mt-4">
+                     <h5 className="text-sm font-bold text-gray-700 border-b pb-1 mb-2">Keterangan Alamat</h5>
+                     <p className="text-sm text-gray-600 bg-white p-2 rounded border shadow-sm">{details.keterangan}</p>
+                 </div>
+            )}
+        </div>
+    );
+};
 
 const Houses = () => {
     const [houses, setHouses] = useState([]);
-    const [residents, setResidents] = useState([]);
+    const [residents, setResidents] = useState([]); // Will only contain unassigned.
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isHouseModalOpen, setIsHouseModalOpen] = useState(false);
@@ -18,13 +105,14 @@ const Houses = () => {
     const [assignData, setAssignData] = useState({
         resident_id: '',
         tanggal_masuk: new Date().toISOString().split('T')[0],
+        tanggal_keluar: '',
         catatan: ''
     });
 
     const fetchHouses = async () => {
         setLoading(true);
         try {
-            const response = await api.get(`/houses?search=${searchTerm}`);
+            const response = await api.get(`/houses?per_page=all`);
             setHouses(response.data.data.data);
         } catch (error) {
             console.error('Error fetching houses:', error);
@@ -33,9 +121,10 @@ const Houses = () => {
         }
     };
 
+    // Filter resident unassigned
     const fetchResidentsList = async () => {
         try {
-            const response = await api.get('/residents/all');
+            const response = await api.get('/residents/all?unassigned=1');
             setResidents(response.data.data);
         } catch (error) {
             console.error('Error fetching residents list:', error);
@@ -44,9 +133,6 @@ const Houses = () => {
 
     useEffect(() => {
         fetchHouses();
-    }, [searchTerm]);
-
-    useEffect(() => {
         fetchResidentsList();
     }, []);
 
@@ -70,10 +156,12 @@ const Houses = () => {
     };
 
     const openAssignModal = (house) => {
+        fetchResidentsList(); // Refresh list to ensure we don't assign someone already assigned.
         setCurrentHouse(house);
         setAssignData({
             resident_id: '',
             tanggal_masuk: new Date().toISOString().split('T')[0],
+            tanggal_keluar: '',
             catatan: ''
         });
         setIsAssignModalOpen(true);
@@ -97,7 +185,16 @@ const Houses = () => {
     const handleAssignResident = async (e) => {
         e.preventDefault();
         try {
-            await api.post(`/houses/${currentHouse.id}/assign-resident`, assignData);
+            const payload = { ...assignData };
+            // Optional cleanup if status is not kontrak but field is filled
+            if (selectedResidentObj?.status_penghuni !== 'kontrak') {
+                delete payload.tanggal_keluar;
+            } else if (!payload.tanggal_keluar) {
+                 alert('Tanggal Selesai harus diisi untuk penghuni Kontrak/Sewa!');
+                 return;
+            }
+
+            await api.post(`/houses/${currentHouse.id}/assign-resident`, payload);
             setIsAssignModalOpen(false);
             fetchHouses();
         } catch (error) {
@@ -129,6 +226,74 @@ const Houses = () => {
         }
     };
 
+    const columns = [
+        {
+            name: 'No Rumah',
+            selector: row => row.nomor_rumah,
+            sortable: true,
+            width: '120px',
+            cell: row => <span className="font-bold text-gray-900">{row.nomor_rumah}</span>
+        },
+        {
+            name: 'Alamat',
+            selector: row => row.alamat,
+            sortable: true,
+            wrap: true
+        },
+        {
+            name: 'Penghuni Saat Ini',
+            selector: row => row.current_resident?.nama_lengkap || '',
+            sortable: true,
+            cell: row => (
+                <div className="font-medium text-gray-900">
+                    {row.current_resident?.nama_lengkap || <span className="text-gray-400 italic">Kosong</span>}
+                </div>
+            )
+        },
+        {
+            name: 'Status',
+            selector: row => row.status_hunian,
+            sortable: true,
+            width: '130px',
+            cell: row => (
+                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${row.status_hunian === 'dihuni' ? 'bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-800'}`}>
+                    {row.status_hunian === 'dihuni' ? 'Dihuni' : 'Kosong'}
+                </span>
+            )
+        },
+        {
+            name: 'Aksi',
+            cell: row => (
+                <div className="flex space-x-2">
+                    {row.status_hunian === 'tidak_dihuni' ? (
+                        <button onClick={() => openAssignModal(row)} className="text-green-600 hover:text-green-900" title="Masukkan Penghuni">
+                            <UserPlus className="h-4 w-4" />
+                        </button>
+                    ) : (
+                        <button onClick={() => handleRemoveResident(row.id)} className="text-orange-500 hover:text-orange-700" title="Pindahkan Penghuni">
+                            <UserMinus className="h-4 w-4" />
+                        </button>
+                    )}
+                    <button onClick={() => openHouseModal(row)} className="text-indigo-600 hover:text-indigo-900" title="Edit Rumah">
+                        <Edit className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => handleDeleteHouse(row.id)} className="text-red-600 hover:text-red-900" title="Hapus Rumah">
+                        <Trash2 className="h-4 w-4" />
+                    </button>
+                </div>
+            ),
+            ignoreRowClick: true,
+            width: '130px'
+        }
+    ];
+
+    const filteredHouses = houses.filter(h => 
+        h.nomor_rumah.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        h.alamat.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const selectedResidentObj = residents.find(r => r.id.toString() === assignData.resident_id.toString());
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
@@ -145,8 +310,8 @@ const Houses = () => {
                 </button>
             </div>
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="p-4 border-b border-gray-200">
+            <div className="bg-white rounded-lg shadow overflow-hidden p-4">
+                <div className="mb-4">
                     <div className="relative rounded-md shadow-sm max-w-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search className="h-5 w-5 text-gray-400" />
@@ -161,69 +326,29 @@ const Houses = () => {
                     </div>
                 </div>
                 
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No Rumah</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Alamat</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penghuni Saat Ini</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th scope="col" className="relative px-6 py-3"><span className="sr-only">Aksi</span></th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">Memuat data...</td>
-                                </tr>
-                            ) : houses.length === 0 ? (
-                                <tr>
-                                    <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data rumah</td>
-                                </tr>
-                            ) : (
-                                houses.map((house) => (
-                                    <tr key={house.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                                            {house.nomor_rumah}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {house.alamat}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                                            {house.current_resident?.nama_lengkap || '-'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${house.status_hunian === 'dihuni' ? 'bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                {house.status_hunian === 'dihuni' ? 'Dihuni' : 'Kosong'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                            {house.status_hunian === 'tidak_dihuni' ? (
-                                                <button onClick={() => openAssignModal(house)} className="text-green-600 hover:text-green-900 inline-flex mr-2" title="Masukkan Penghuni">
-                                                    <UserPlus className="h-5 w-5" />
-                                                </button>
-                                            ) : (
-                                                <button onClick={() => handleRemoveResident(house.id)} className="text-orange-500 hover:text-orange-700 inline-flex mr-2" title="Pindahkan Penghuni">
-                                                    <UserMinus className="h-5 w-5" />
-                                                </button>
-                                            )}
-                                            <button onClick={() => openHouseModal(house)} className="text-indigo-600 hover:text-indigo-900 inline-flex mr-2">
-                                                <Edit className="h-5 w-5" />
-                                            </button>
-                                            <button onClick={() => handleDeleteHouse(house.id)} className="text-red-600 hover:text-red-900 inline-flex">
-                                                <Trash2 className="h-5 w-5" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable
+                    columns={columns}
+                    data={filteredHouses}
+                    pagination
+                    progressPending={loading}
+                    expandableRows
+                    expandableRowsComponent={ExpandedHouseComponent}
+                    highlightOnHover
+                    responsive
+                    noDataComponent={<div className="p-4 text-center text-gray-500">Tidak ada data rumah</div>}
+                    customStyles={{
+                        headRow: {
+                            style: {
+                                backgroundColor: '#f9fafb',
+                                fontWeight: '600',
+                                color: '#4b5563'
+                            }
+                        }
+                    }}
+                />
             </div>
 
-            {/* Modal Tambah/Edit Rumah */}
+            {/* Modal Form */}
             {isHouseModalOpen && (
                 <div className="fixed inset-0 z-50 overflow-y-auto">
                     <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
@@ -249,6 +374,10 @@ const Houses = () => {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">Alamat Lengkap</label>
                                         <textarea value={formData.alamat} onChange={(e) => setFormData({...formData, alamat: e.target.value})} required rows="3" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Keterangan Tambahan</label>
+                                        <textarea value={formData.keterangan} onChange={(e) => setFormData({...formData, keterangan: e.target.value})} rows="2" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                                     </div>
                                     <div className="mt-5 sm:mt-6 sm:flex sm:flex-row-reverse pb-2">
                                         <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
@@ -277,10 +406,13 @@ const Houses = () => {
                                         <X className="h-6 w-6" />
                                     </button>
                                 </div>
-                                <p className="mb-4 text-sm text-gray-500">Rumah: <strong>{currentHouse?.nomor_rumah}</strong></p>
+                                <div className="mb-4 bg-indigo-50 p-3 rounded-md flex">
+                                    <Info className="h-5 w-5 text-indigo-400 mr-2" />
+                                    <span className="text-sm text-indigo-700">Rumah: <span className="font-bold">{currentHouse?.nomor_rumah}</span> - {currentHouse?.alamat}</span>
+                                </div>
                                 <form onSubmit={handleAssignResident} className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Pilih Penghuni</label>
+                                        <label className="block text-sm font-medium text-gray-700">Pilih Penghuni yang Belum Menempati Rumah Manapun</label>
                                         <select required value={assignData.resident_id} onChange={(e) => setAssignData({...assignData, resident_id: e.target.value})} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                             <option value="">-- Pilih Penghuni --</option>
                                             {residents.map(r => (
@@ -288,12 +420,27 @@ const Houses = () => {
                                             ))}
                                         </select>
                                     </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Tanggal Masuk</label>
+                                            <input type="date" required value={assignData.tanggal_masuk} onChange={(e) => setAssignData({...assignData, tanggal_masuk: e.target.value})} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                                        </div>
+                                        
+                                        {selectedResidentObj?.status_penghuni === 'kontrak' && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Tanggal Selesai (Kontrak)</label>
+                                                <input type="date" required={selectedResidentObj?.status_penghuni === 'kontrak'} value={assignData.tanggal_keluar} onChange={(e) => setAssignData({...assignData, tanggal_keluar: e.target.value})} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Tanggal Masuk</label>
-                                        <input type="date" required value={assignData.tanggal_masuk} onChange={(e) => setAssignData({...assignData, tanggal_masuk: e.target.value})} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                                        <label className="block text-sm font-medium text-gray-700">Catatan</label>
+                                        <textarea value={assignData.catatan} onChange={(e) => setAssignData({...assignData, catatan: e.target.value})} rows="2" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                                     </div>
                                     <div className="mt-5 sm:mt-6 sm:flex sm:flex-row-reverse pb-2">
-                                        <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
+                                        <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Simpan Alokasi</button>
                                         <button type="button" onClick={() => setIsAssignModalOpen(false)} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Batal</button>
                                     </div>
                                 </form>

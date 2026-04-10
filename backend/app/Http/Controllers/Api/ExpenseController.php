@@ -38,9 +38,6 @@ class ExpenseController extends Controller
             $query->where('tanggal', '<=', $request->date_to);
         }
 
-        $expenses = $query->orderBy('tanggal', 'desc')->paginate($request->per_page ?? 15);
-
-        // Total for the current filter
         $totalQuery = Expense::query();
         if ($request->bulan && $request->tahun) {
             $totalQuery->whereMonth('tanggal', $request->bulan)->whereYear('tanggal', $request->tahun);
@@ -48,6 +45,17 @@ class ExpenseController extends Controller
             $totalQuery->whereYear('tanggal', $request->tahun);
         }
         $total = $totalQuery->sum('jumlah');
+
+        if ($request->per_page === 'all') {
+            $expenses = $query->orderBy('tanggal', 'desc')->get();
+            return response()->json([
+                'success' => true,
+                'data' => ['data' => $expenses],
+                'total' => (float) $total,
+            ]);
+        }
+
+        $expenses = $query->orderBy('tanggal', 'desc')->paginate($request->per_page ?? 15);
 
         return response()->json([
             'success' => true,

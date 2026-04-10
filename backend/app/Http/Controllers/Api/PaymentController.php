@@ -36,6 +36,18 @@ class PaymentController extends Controller
             });
         }
 
+        if ($request->per_page === 'all') {
+            $payments = $query->orderBy('tahun', 'desc')
+                ->orderBy('bulan', 'desc')
+                ->orderBy('jenis_iuran')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => [ 'data' => $payments ],
+            ]);
+        }
+
         $payments = $query->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
             ->orderBy('jenis_iuran')

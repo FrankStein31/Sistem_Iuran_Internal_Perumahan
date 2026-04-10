@@ -1,6 +1,52 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, X, Home } from 'lucide-react';
 import api from '../api/axios';
+import DataTable_ from 'react-data-table-component';
+const DataTable = DataTable_.default || DataTable_;
+
+const ExpandedComponent = ({ data }) => {
+    // Current house resident
+    const currentHouse = data.current_house_resident?.house;
+    
+    // Previous houses
+    const pastHouses = data.house_residents?.filter(hr => !hr.is_active) || [];
+
+    return (
+        <div className="p-4 bg-gray-50 border-b border-gray-100 pl-16">
+            <h4 className="font-semibold text-gray-800 mb-2 flex items-center"><Home className="w-4 h-4 mr-2 text-indigo-500" /> Detail Info Penghuni</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h5 className="text-sm font-medium text-gray-600 mb-1">Rumah Saat Ini:</h5>
+                    {currentHouse ? (
+                        <p className="text-sm text-gray-900 font-medium bg-white p-2 border rounded">{currentHouse.nomor_rumah} - {currentHouse.alamat}</p>
+                    ) : (
+                        <p className="text-sm text-gray-500 italic bg-white p-2 border rounded">Tidak menempati rumah</p>
+                    )}
+                </div>
+                {data.foto_ktp && (
+                    <div>
+                        <h5 className="text-sm font-medium text-gray-600 mb-1">Foto KTP:</h5>
+                        <img src={`http://localhost:8000/storage/${data.foto_ktp}`} alt="KTP" className="mt-1 h-32 object-cover rounded shadow-sm border" />
+                    </div>
+                )}
+            </div>
+            
+            {pastHouses.length > 0 && (
+                <div className="mt-4">
+                    <h5 className="text-sm font-medium text-gray-600 mb-2">Riwayat Menempati Rumah:</h5>
+                    <ul className="list-inside list-disc text-sm text-gray-700 bg-white p-3 border rounded">
+                        {pastHouses.map((hr, idx) => (
+                            <li key={idx}>
+                                <span className="font-medium">{hr.house?.nomor_rumah}</span> 
+                                <span className="text-gray-500 text-xs ml-2">(Masuk: {hr.tanggal_masuk} - Keluar: {hr.tanggal_keluar})</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+};
 
 const Residents = () => {
     const [residents, setResidents] = useState([]);
@@ -14,14 +60,15 @@ const Residents = () => {
         status_penghuni: 'tetap',
         no_hp: '',
         status_nikah: 'belum_menikah',
-        catatan: ''
+        catatan: '',
+        foto_ktp: null
     });
 
     const fetchResidents = async () => {
         setLoading(true);
         try {
-            const response = await api.get(`/residents?search=${searchTerm}`);
-            setResidents(response.data.data.data); // data.data.data because of pagination
+            const response = await api.get(`/residents?per_page=all`);
+            setResidents(response.data.data.data); 
         } catch (error) {
             console.error('Error fetching residents:', error);
         } finally {
@@ -31,11 +78,15 @@ const Residents = () => {
 
     useEffect(() => {
         fetchResidents();
-    }, [searchTerm]);
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+    };
+
+    const handleFileChange = (e) => {
+        setFormData({ ...formData, foto_ktp: e.target.files[0] });
     };
 
     const openModal = (resident = null) => {
@@ -47,7 +98,8 @@ const Residents = () => {
                 status_penghuni: resident.status_penghuni,
                 no_hp: resident.no_hp,
                 status_nikah: resident.status_nikah,
-                catatan: resident.catatan || ''
+                catatan: resident.catatan || '',
+                foto_ktp: null
             });
         } else {
             setCurrentResident(null);
@@ -57,7 +109,8 @@ const Residents = () => {
                 status_penghuni: 'tetap',
                 no_hp: '',
                 status_nikah: 'belum_menikah',
-                catatan: ''
+                catatan: '',
+                foto_ktp: null
             });
         }
         setIsModalOpen(true);
@@ -66,10 +119,26 @@ const Residents = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const data = new FormData();
+            data.append('nama_lengkap', formData.nama_lengkap);
+            data.append('no_ktp', formData.no_ktp);
+            data.append('status_penghuni', formData.status_penghuni);
+            data.append('no_hp', formData.no_hp);
+            data.append('status_nikah', formData.status_nikah);
+            if (formData.catatan) data.append('catatan', formData.catatan);
+            if (formData.foto_ktp instanceof File) {
+                data.append('foto_ktp', formData.foto_ktp);
+            }
+
             if (currentResident) {
-                await api.put(`/residents/${currentResident.id}`, formData);
+                data.append('_method', 'PUT'); // required for Laravel file uploads in PUT
+                await api.post(`/residents/${currentResident.id}`, data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
             } else {
-                await api.post('/residents', formData);
+                await api.post('/residents', data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
             }
             setIsModalOpen(false);
             fetchResidents();
@@ -90,6 +159,64 @@ const Residents = () => {
         }
     };
 
+    const columns = [
+        {
+            name: 'Nama Lengkap / KTP',
+            selector: row => row.nama_lengkap,
+            sortable: true,
+            cell: row => (
+                <div className="flex items-center py-2">
+                    <div>
+                        <div className="text-sm font-medium text-gray-900">{row.nama_lengkap}</div>
+                        <div className="text-sm text-gray-500">{row.no_ktp}</div>
+                    </div>
+                </div>
+            )
+        },
+        {
+            name: 'Kontak',
+            selector: row => row.no_hp,
+            sortable: true,
+        },
+        {
+            name: 'Status Hunian',
+            selector: row => row.status_penghuni,
+            sortable: true,
+            cell: row => (
+                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${row.status_penghuni === 'tetap' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    {row.status_penghuni === 'tetap' ? 'Tetap' : 'Kontrak'}
+                </span>
+            )
+        },
+        {
+            name: 'Status Nikah',
+            selector: row => row.status_nikah,
+            sortable: true,
+            cell: row => row.status_nikah === 'menikah' ? 'Menikah' : 'Belum Menikah'
+        },
+        {
+            name: 'Aksi',
+            cell: row => (
+                <div className="flex space-x-2">
+                    <button onClick={() => openModal(row)} className="text-indigo-600 hover:text-indigo-900">
+                        <Edit className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => handleDelete(row.id)} className="text-red-600 hover:text-red-900">
+                        <Trash2 className="h-4 w-4" />
+                    </button>
+                </div>
+            ),
+            ignoreRowClick: true,
+            width: '100px'
+        }
+    ];
+
+    const filteredItems = residents.filter(
+        item => item.nama_lengkap.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                item.no_ktp.includes(searchTerm) || 
+                item.no_hp.includes(searchTerm)
+    );
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
@@ -106,8 +233,8 @@ const Residents = () => {
                 </button>
             </div>
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="p-4 border-b border-gray-200">
+            <div className="bg-white rounded-lg shadow overflow-hidden p-4">
+                <div className="mb-4">
                     <div className="relative rounded-md shadow-sm max-w-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search className="h-5 w-5 text-gray-400" />
@@ -122,62 +249,26 @@ const Residents = () => {
                     </div>
                 </div>
                 
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Lengkap / KTP</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kontak</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status Hunian</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status Nikah</th>
-                                <th scope="col" className="relative px-6 py-3"><span className="sr-only">Aksi</span></th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">Memuat data...</td>
-                                </tr>
-                            ) : residents.length === 0 ? (
-                                <tr>
-                                    <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data penghuni</td>
-                                </tr>
-                            ) : (
-                                residents.map((resident) => (
-                                    <tr key={resident.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="ml-4">
-                                                    <div className="text-sm font-medium text-gray-900">{resident.nama_lengkap}</div>
-                                                    <div className="text-sm text-gray-500">{resident.no_ktp}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {resident.no_hp}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${resident.status_penghuni === 'tetap' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                                {resident.status_penghuni === 'tetap' ? 'Tetap' : 'Kontrak'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {resident.status_nikah === 'menikah' ? 'Menikah' : 'Belum Menikah'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                            <button onClick={() => openModal(resident)} className="text-indigo-600 hover:text-indigo-900 inline-flex">
-                                                <Edit className="h-5 w-5" />
-                                            </button>
-                                            <button onClick={() => handleDelete(resident.id)} className="text-red-600 hover:text-red-900 inline-flex">
-                                                <Trash2 className="h-5 w-5" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable
+                    columns={columns}
+                    data={filteredItems}
+                    pagination
+                    progressPending={loading}
+                    expandableRows
+                    expandableRowsComponent={ExpandedComponent}
+                    highlightOnHover
+                    responsive
+                    noDataComponent={<div className="p-4 text-center text-gray-500">Tidak ada data penghuni</div>}
+                    customStyles={{
+                        headRow: {
+                            style: {
+                                backgroundColor: '#f9fafb',
+                                fontWeight: '600',
+                                color: '#4b5563'
+                            }
+                        }
+                    }}
+                />
             </div>
 
             {/* Modal Form */}
@@ -210,6 +301,11 @@ const Residents = () => {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">Nomor KTP (16 Digit)</label>
                                         <input type="text" name="no_ktp" required maxLength={16} minLength={16} value={formData.no_ktp} onChange={handleInputChange} className="mt-1 flex-1 block w-full rounded-md sm:text-sm border-gray-300 border py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500" />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Upload Foto KTP (Opsional)</label>
+                                        <input type="file" name="foto_ktp" accept="image/jpeg,image/png,image/jpg" onChange={handleFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-gray-300 rounded-md" />
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
