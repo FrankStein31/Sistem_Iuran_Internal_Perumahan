@@ -19,11 +19,10 @@ const formatDate = (dateString) => {
 };
 
 const ExpandedComponent = ({ data }) => {
-    // Current house resident
     const currentHouse = data.current_house_resident?.house;
-    
-    // Previous houses
     const pastHouses = data.house_residents?.filter(hr => !hr.is_active) || [];
+    const [showKtpPopup, setShowKtpPopup] = useState(false);
+    const ktpUrl = data.foto_ktp ? `/storage/${data.foto_ktp}` : null;
 
     return (
         <div className="p-4 bg-gray-50 border-b border-gray-100 pl-16">
@@ -37,13 +36,42 @@ const ExpandedComponent = ({ data }) => {
                         <p className="text-sm text-gray-500 italic bg-white p-2 border rounded">Tidak menempati rumah</p>
                     )}
                 </div>
-                {data.foto_ktp && (
+                {ktpUrl && (
                     <div>
                         <h5 className="text-sm font-medium text-gray-600 mb-1">Preview KTP:</h5>
-                        <img src={`/storage/${data.foto_ktp}`} onError={(e) => { e.target.onerror = null; e.target.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'%3E%3Crect width='300' height='200' fill='%23f3f4f6'/%3E%3Ctext x='150' y='100' font-family='sans-serif' font-size='14' text-anchor='middle' dominant-baseline='middle' fill='%239ca3af'%3EGambar Tidak Ditemukan%3C/text%3E%3C/svg%3E"; }} alt="KTP" className="mt-1 h-32 w-auto object-cover rounded shadow-sm border border-gray-200" />
+                        <img
+                            src={ktpUrl}
+                            onError={(e) => { e.target.onerror = null; e.target.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200' viewBox='0 0 300 200'%3E%3Crect width='300' height='200' fill='%23f3f4f6'/%3E%3Ctext x='150' y='100' font-family='sans-serif' font-size='14' text-anchor='middle' dominant-baseline='middle' fill='%239ca3af'%3EGambar Tidak Ditemukan%3C/text%3E%3C/svg%3E"; }}
+                            alt="KTP"
+                            onClick={() => setShowKtpPopup(true)}
+                            className="mt-1 h-32 w-auto object-cover rounded shadow-sm border border-gray-200 cursor-zoom-in hover:opacity-90 transition"
+                        />
+                        <p className="text-xs text-gray-400 mt-1">Klik untuk perbesar</p>
                     </div>
                 )}
             </div>
+
+            {showKtpPopup && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
+                    onClick={() => setShowKtpPopup(false)}
+                >
+                    <div className="relative max-w-3xl w-full mx-4" onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={() => setShowKtpPopup(false)}
+                            className="absolute -top-10 right-0 text-white hover:text-gray-300 transition"
+                        >
+                            <X className="w-8 h-8" />
+                        </button>
+                        <img
+                            src={ktpUrl}
+                            alt="KTP Full"
+                            className="w-full rounded-lg shadow-2xl"
+                        />
+                        <p className="text-center text-gray-300 text-sm mt-3">KTP - {data.nama_lengkap}</p>
+                    </div>
+                </div>
+            )}
             
             {pastHouses.length > 0 && (
                 <div className="mt-4">
