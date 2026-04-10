@@ -1,28 +1,26 @@
-# 🏘️ Sistem Administrasi RT Perumahan Elite
+# Sistem Administrasi RT Perumahan Elite
 
 Sistem manajemen iuran dan data warga tingkat Rukun Tetangga (RT) berbasis **Headless API** menggunakan **Laravel 13** (Backend) dan **React 18 + Vite** (Frontend SPA).
 
-## ✨ Fitur Utama
+## Fitur Utama
 
-| Fitur | Keterangan |
-|---|---|
-| 📊 **Dashboard** | Statistik realtime: pendapatan, pengeluaran, saldo, dan grafik 12 bulan |
-| 👤 **Manajemen Penghuni** | CRUD data penghuni tetap/kontrak beserta upload foto KTP |
-| 🏠 **Manajemen Rumah** | Pengelolaan rumah dan riwayat historis penghuni masuk/keluar |
-| 💰 **Manajemen Iuran** | Tagihan satpam & kebersihan, bulk generate bulanan, export Excel |
-| 📋 **Manajemen Pengeluaran** | Arsip kas keluar dengan kategori & pencatatan tanggal |
-| 🔐 **Autentikasi** | Login aman via Laravel Sanctum, edit profil admin |
+- **Dashboard** — Statistik realtime: pendapatan, pengeluaran, saldo, dan grafik 12 bulan
+- **Manajemen Penghuni** — CRUD data penghuni tetap/kontrak beserta upload foto KTP
+- **Manajemen Rumah** — Pengelolaan rumah dan riwayat historis penghuni masuk/keluar
+- **Manajemen Iuran** — Tagihan satpam & kebersihan, bulk generate bulanan, export Excel
+- **Manajemen Pengeluaran** — Arsip kas keluar dengan kategori & pencatatan tanggal
+- **Autentikasi** — Login aman via Laravel Sanctum, edit profil admin
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend:** Laravel 13, PHP 8.3+, MySQL/MariaDB, Laravel Sanctum
 - **Frontend:** React 18, Vite, Tailwind CSS v4, Axios, React Router v7, Recharts, Lucide React, react-data-table-component, xlsx
 
 ---
 
-## 📋 Prasyarat Sistem
+## Prasyarat Sistem
 
 Sebelum memulai instalasi, pastikan perangkat lunak berikut sudah terpasang:
 
@@ -35,11 +33,11 @@ Sebelum memulai instalasi, pastikan perangkat lunak berikut sudah terpasang:
 | **MySQL / MariaDB** | 8.0+ / 10.4+ | `mysql --version` |
 | **Git** | terbaru | `git --version` |
 
-> **💡 Rekomendasi:** Gunakan [Laragon](https://laragon.org/) (Windows) atau [XAMPP](https://www.apachefriends.org/) untuk mengelola PHP dan MySQL secara mudah.
+> **Rekomendasi:** Gunakan [Laragon](https://laragon.org/) (Windows) atau [XAMPP](https://www.apachefriends.org/) untuk mengelola PHP dan MySQL secara mudah.
 
 ---
 
-## 🚀 Panduan Instalasi Lengkap
+## Panduan Instalasi Lengkap
 
 ### Langkah 1 — Clone Repository
 
@@ -53,9 +51,9 @@ cd Sistem_Iuran_Internal_Perumahan
 Struktur folder proyek:
 ```
 Sistem_Iuran_Internal_Perumahan/
-├── backend/            ← Laravel API
-├── frontend/           ← React SPA
-├── iuran_perumahan.sql ← File dump database (opsional)
+├── backend/            <- Laravel API
+├── frontend/           <- React SPA
+├── iuran_perumahan.sql <- File dump database (opsional)
 └── README.md
 ```
 
@@ -75,7 +73,7 @@ cd backend
 composer install
 ```
 
-> ⏳ Proses ini membutuhkan waktu beberapa menit tergantung koneksi internet.
+> Proses ini membutuhkan waktu beberapa menit tergantung koneksi internet.
 
 #### 2.3 Buat file konfigurasi `.env`
 
@@ -113,9 +111,9 @@ APP_URL=http://localhost:8000
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=iuran_perumahan   # ← nama database yang akan dibuat
-DB_USERNAME=root               # ← username MySQL Anda
-DB_PASSWORD=                   # ← password MySQL Anda (kosong jika tidak ada)
+DB_DATABASE=iuran_perumahan   # <- nama database yang akan dibuat
+DB_USERNAME=root               # <- username MySQL Anda
+DB_PASSWORD=                   # <- password MySQL Anda (kosong jika tidak ada)
 ```
 
 ---
@@ -126,7 +124,7 @@ Terdapat **dua metode** untuk menyiapkan database. Pilih salah satu:
 
 ---
 
-#### ✅ Metode A: Import File SQL (Direkomendasikan — Data Lengkap Siap Pakai)
+#### Metode A: Import File SQL (Direkomendasikan — Data Lengkap Siap Pakai)
 
 Metode ini mengimpor **seluruh struktur tabel + data contoh** sekaligus:
 - 20 Rumah (Blok A No. 1–20)
@@ -162,7 +160,7 @@ mysql -u root -p iuran_perumahan < iuran_perumahan.sql
 Via phpMyAdmin:
 1. Klik database `iuran_perumahan` di sidebar
 2. Klik tab **Import** di menu atas
-3. Klik **Choose File** → pilih file `iuran_perumahan.sql`
+3. Klik **Choose File** lalu pilih file `iuran_perumahan.sql`
 4. Klik tombol **Go / Import**
 5. Tunggu hingga muncul pesan sukses hijau
 
@@ -173,7 +171,7 @@ Via phpMyAdmin:
 php artisan migrate --pretend
 ```
 
-Jika tidak ada error merah, lanjut ke Langkah 4. \
+Jika tidak ada error merah, lanjut ke Langkah 4.
 Jika ada tabel yang belum ada, jalankan:
 ```bash
 php artisan migrate
@@ -181,11 +179,11 @@ php artisan migrate
 
 ---
 
-#### 🌱 Metode B: Migrasi + Seeder (Data Baru dari Laravel)
+#### Metode B: Migrasi + Seeder (Data Baru dari Laravel)
 
 Metode ini membuat ulang semua tabel dan mengisi data dummy otomatis via Laravel Seeder.
 
-> ⚠️ **Peringatan:** Perintah `migrate:fresh` akan **menghapus semua tabel & data** yang sudah ada, lalu membuat ulang dari awal.
+> **Peringatan:** Perintah `migrate:fresh` akan **menghapus semua tabel & data** yang sudah ada, lalu membuat ulang dari awal.
 
 **Langkah B1 — Buat database kosong terlebih dahulu** (sama seperti Metode A, Langkah A1).
 
@@ -197,9 +195,9 @@ php artisan migrate:fresh --seed
 ```
 
 Proses ini akan otomatis:
-- ✅ Membuat semua tabel database
-- ✅ Mengisi data penghuni, rumah, iuran, dan pengeluaran dummy
-- ✅ Membuat akun admin default
+- Membuat semua tabel database
+- Mengisi data penghuni, rumah, iuran, dan pengeluaran dummy
+- Membuat akun admin default
 
 ---
 
@@ -217,7 +215,7 @@ Output yang diharapkan:
 INFO  The [public/storage] link has been connected to [storage/app/public].
 ```
 
-> **⚠️ Catatan Windows:**
+> **Catatan Windows:**
 >
 > Jika muncul error:
 > ```
@@ -247,7 +245,7 @@ INFO  Server running on [http://127.0.0.1:8000].
   Press Ctrl+C to stop the server
 ```
 
-> 🔒 **Biarkan terminal ini tetap terbuka.** Backend API aktif di `http://localhost:8000`.
+> **Biarkan terminal ini tetap terbuka.** Backend API aktif di `http://localhost:8000`.
 
 ---
 
@@ -268,7 +266,7 @@ cd frontend
 npm install
 ```
 
-> ⏳ Proses ini memerlukan beberapa menit pertama kali. Selanjutnya akan lebih cepat karena cache.
+> Proses ini memerlukan beberapa menit pertama kali. Selanjutnya akan lebih cepat karena cache.
 
 #### 6.3 Verifikasi konfigurasi API (opsional)
 
@@ -289,8 +287,8 @@ Output yang diharapkan:
 ```
   VITE v6.x.x  ready in xxx ms
 
-  ➜  Local:   http://localhost:5173/
-  ➜  Network: use --host to expose
+  Local:   http://localhost:5173/
+  Network: use --host to expose
 ```
 
 ---
@@ -299,18 +297,18 @@ Output yang diharapkan:
 
 Buka browser dan akses: **[http://localhost:5173](http://localhost:5173)**
 
-#### 🔑 Kredensial Login Default
+#### Kredensial Login Default
 
 | Field | Value |
 |---|---|
 | **Email** | `admin@rt.com` |
 | **Password** | `password` |
 
-> 💡 Email, nama, dan password dapat diubah setelah login melalui menu **Profil Admin** (ikon ⚙️ di sidebar kiri, di atas tombol Logout).
+> Email, nama, dan password dapat diubah setelah login melalui menu **Profil Admin** di sidebar kiri (di atas tombol Logout).
 
 ---
 
-## ⚡ Quick Reference — Rangkuman Semua Perintah
+## Quick Reference — Rangkuman Semua Perintah
 
 ```bash
 # ===================== BACKEND =====================
@@ -346,7 +344,7 @@ npm run dev
 
 ---
 
-## 📊 Entity Relationship Diagram (ERD)
+## Entity Relationship Diagram (ERD)
 
 ```mermaid
 erDiagram
@@ -413,7 +411,7 @@ erDiagram
 
 ---
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 | Masalah | Kemungkinan Penyebab | Solusi |
 |---|---|---|
@@ -429,6 +427,6 @@ erDiagram
 
 ---
 
-## 👨‍💻 Pengembang
+## Pengembang
 
 Dikembangkan oleh **Frankie Steinlie**
