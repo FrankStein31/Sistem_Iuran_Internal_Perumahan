@@ -4,12 +4,31 @@ Sistem manajemen iuran dan data warga tingkat Rukun Tetangga (RT) berbasis **Hea
 
 ## Fitur Utama
 
-- **Dashboard** — Statistik realtime: pendapatan, pengeluaran, saldo, dan grafik 12 bulan
-- **Manajemen Penghuni** — CRUD data penghuni tetap/kontrak beserta upload foto KTP
-- **Manajemen Rumah** — Pengelolaan rumah dan riwayat historis penghuni masuk/keluar
-- **Manajemen Iuran** — Tagihan satpam & kebersihan, bulk generate bulanan, export Excel
-- **Manajemen Pengeluaran** — Arsip kas keluar dengan kategori & pencatatan tanggal
-- **Autentikasi** — Login aman via Laravel Sanctum, edit profil admin
+- **Autentikasi** — Login aman via Laravel Sanctum, edit profil admin <br>
+<img width="1761" height="1011" alt="image" src="https://github.com/user-attachments/assets/f01dba59-9ca0-4a2e-a7b7-87db515de673" />
+<br>
+<img width="1761" height="1011" alt="image" src="https://github.com/user-attachments/assets/cd3ec1c4-5d9f-45af-be56-395dcacd813c" />
+<br>
+
+- **Dashboard** — Statistik realtime: pendapatan, pengeluaran, saldo, dan grafik 12 bulan <br>
+<img width="1761" height="1088" alt="image" src="https://github.com/user-attachments/assets/52d272a9-af1a-4732-874e-2918a51565eb" />
+<br>
+
+- **Manajemen Penghuni** — CRUD data penghuni tetap/kontrak beserta upload foto KTP <br>
+<img width="1761" height="1045" alt="image" src="https://github.com/user-attachments/assets/7eba275c-3239-49c2-a7a9-123de7caf49e" />
+<br>
+
+- **Manajemen Rumah** — Pengelolaan rumah dan riwayat historis penghuni masuk/keluar <br>
+<img width="1761" height="1011" alt="image" src="https://github.com/user-attachments/assets/354f0466-28be-4b09-9d8b-4187b5ec1d22" />
+<br>
+
+- **Manajemen Iuran** — Tagihan satpam & kebersihan, bulk generate bulanan, export Excel <br>
+<img width="1761" height="1011" alt="image" src="https://github.com/user-attachments/assets/5c41086b-8823-4232-b52e-8ac137f92de2" />
+<br>
+
+- **Manajemen Pengeluaran** — Arsip kas keluar dengan kategori & pencatatan tanggal <br>
+<img width="1761" height="1011" alt="image" src="https://github.com/user-attachments/assets/597cd943-1439-4bfe-b786-d32cb4fe3600" />
+<br>
 
 ---
 
